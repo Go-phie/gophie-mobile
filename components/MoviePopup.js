@@ -24,7 +24,7 @@ class MoviePopup extends Component {
             // extract movie size
             //regular expression to match size
             // let size = parseFloat(re.exec(String(movie.Size))[0])
-            let description = movie.Description !== " " ?
+            let description = movie.Description === "" ?
                 "Could not retrieve descriptions from " + engine :
                 movie.Description
             return ( 

@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import uuid from 'react-native-uuid';
-import { listMovies, openMovie, closeMovie } from '../reducers';
+import AsyncStorage from '@react-native-community/async-storage';
+import { listMovies, openMovie, closeMovie, setNotifications, selectEngine } from '../reducers';
 import MoviePoster from './MoviePoster';
 import MoviePopup from './MoviePopup';
+import {ENGINE_KEY, SHOW_NOTIFICATIONS_KEY} from '../consts'
 
 
 const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
@@ -16,11 +18,32 @@ const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
 
 class MovieList extends Component {
   componentDidMount() {
+    this.loadAsyncData();
     this.props.listMovies("GET", this.props.engine, this.props.listIndex);
+  }
+
+  loadAsyncData = async () => {
+    try {
+      const sNotifications = await AsyncStorage.getItem(SHOW_NOTIFICATIONS_KEY)
+      if (sNotifications !== null) {
+        this.props.setNotifications(JSON.parse(sNotifications))
+      }
+    } catch (e) {
+      console.log(e)
+    }
+
+    try {
+      const egnIndex = await AsyncStorage.getItem(ENGINE_KEY)
+      if (egnIndex !== null) {
+        this.props.selectEngine(this.props.engines[JSON.parse(egnIndex)])
+      }
+    } catch (e) {
+      console.log(e)
+    }
   }
   
   render() {
-    const { movies, openMovie, closeMovie, popupIsOpen } = this.props;
+    const { movies, openMovie } = this.props;
     return (
       <View style={styles.container}>
       <ScrollView
@@ -57,9 +80,11 @@ const mapStateToProps = state => {
   return {
     movies: storedMovies,
     engine: state.engine,
+    engines: state.engines,
     listIndex: state.listIndex,
     popupIsOpen: state.popupIsOpen,
     movie: state.movie,
+    showNotifications: state.showNotifications,
   };
 };
 
@@ -67,6 +92,8 @@ const mapDispatchToProps = {
   listMovies,
   openMovie,
   closeMovie,
+  setNotifications,
+  selectEngine,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(MovieList);

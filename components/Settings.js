@@ -4,91 +4,51 @@ import {
   View,
   Switch
 } from 'react-native';
+import { connect } from 'react-redux';
 import { Card, Text, ButtonGroup, Button } from 'react-native-elements';
-import Slider from '@react-native-community/slider';
+import {ToastAndroid} from 'react-native';
+import {setNotifications, selectEngine} from '../reducers'
 import AsyncStorage from '@react-native-community/async-storage';
 import { defaultStyles } from '../styles'
+import {SHOW_NOTIFICATIONS_KEY, ENGINE_KEY} from '../consts'
 
-const SHOW_NOTIFICATIONS_KEY = 'notifications';
-const THEME_COLOR_KEY = 'theme_color';
-const AGE_KEY = 'age';
+class Settings extends Component {
 
-export default class Settings extends Component {
-
-  state = {
-    showNotifications: false,
-    age: 18
-  }
-  colors = [defaultStyles.themecolor.backgroundColor, 'green', 'red', 'purple'];
-
-  componentDidMount() {
-    this.loadAsyncData();
-  }
-
-  loadAsyncData = async () => {
-    try {
-      const showNotifications = await AsyncStorage.getItem(SHOW_NOTIFICATIONS_KEY)
-      if (showNotifications !== null) {
-        this.setState({ showNotifications: JSON.parse(showNotifications) });
-      }
-    } catch (e) {
-      console.log(e)
-    }
-
-    try {
-      const themeColorIndex = await AsyncStorage.getItem(THEME_COLOR_KEY)
-      if (themeColorIndex !== null) {
-      }
-    } catch (e) {
-      console.log(e)
-    }
-
-    try {
-      const age = await AsyncStorage.getItem(AGE_KEY)
-      if (age !== null) {
-        this.setState({ age: JSON.parse(age) });
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  storeNotification = async (key, showNotifications) => {
+  storeNotification = async (showNotifications) => {
     try {
       await AsyncStorage.setItem(SHOW_NOTIFICATIONS_KEY, JSON.stringify(showNotifications))
-      this.setState({ showNotifications });
+      this.props.setNotifications(showNotifications)
     } catch (e) {
       console.log(e);
     }
   }
 
-  storeThemeColors = async (key, themeIndex) => {
+  storeSelectedEngine = async (egnIndex) => {
     try {
-      await AsyncStorage.setItem(THEME_COLOR_KEY, JSON.stringify(themeIndex));
+      await AsyncStorage.setItem(ENGINE_KEY, JSON.stringify(egnIndex))
+      this.props.selectEngine(this.props.engines[egnIndex])
+      ToastAndroid.show('Engine set to ' + this.props.engines[egnIndex], ToastAndroid.SHORT);
     } catch (e) {
       console.log(e);
     }
   }
 
-  storeAge = async (key, age) => {
-    try {
-      await AsyncStorage.setItem(AGE_KEY, JSON.stringify(age));
-      this.setState({ age });
-    } catch (e) {
-      console.log(e);
+  engineToIndex = (engine) => {
+    for (var i=0; i< this.props.engines.length; i++){
+      if (this.props.engines.length === engine) {
+        return i
+      }
     }
   }
 
   restoreDefaults = () => {
-    this.storeNotification(SHOW_NOTIFICATIONS_KEY, false);
-    this.storeThemeColors(THEME_COLOR_KEY, 0);
-    this.storeAge(AGE_KEY, 18);
+    this.storeNotification(false);
+    this.storeSelectedEngine(0);
   }
 
-  render() {
-    const themeColorIndex = 0;
-
+  render(){
     console.disableYellowBox = true;
+    const notif = this.props.showNotifications
     return (
       <View style={styles.container}>
         <Card containerStyle={styles.card} title='Notifications' >
@@ -96,40 +56,28 @@ export default class Settings extends Component {
             <Text style={styles.text}>Show Notifications</Text>
             <Switch
               style={{ marginLeft: 16 }}
-              trackColor={{ true: this.colors[themeColorIndex] }}
+              trackColor={{ true: defaultStyles.themecolor.backgroundColor }}
               thumbColor='white'
-              value={this.state.showNotifications}
+              value={notif}
               onValueChange={(showNotifications) => {
-                this.storeNotification(SHOW_NOTIFICATIONS_KEY, showNotifications);
-                console.log(showNotifications)
+                this.storeNotification(showNotifications);
               }}
             />
           </View>
         </Card>
-        <Card containerStyle={styles.card} title='Age' >
-          <View style={styles.row}>
-            <Text style={styles.text} >{this.state.age}</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={18}
-              maximumValue={65}
-              minimumTrackTintColor={this.colors[themeColorIndex]}
-              step={1}
-              thumbTintColor='white'
-              value={this.state.age}
-              onValueChange={(age) => {
-                this.storeAge(AGE_KEY, age);
-              }}
-            />
-          </View>
+        <Card containerStyle={styles.card} title='Engine'>
+        <ButtonGroup
+          selectedIndex={this.engineToIndex(this.props.engine)}
+          selectedTextStyle={{color: '#000000'}}
+          onPress={this.storeSelectedEngine}
+          buttons={this.props.engines}
+          selectedButtonStyle={{backgroundColor: defaultStyles.themecolor.backgroundColor}}
+          containerStyle={{height: 50, width: 200, borderRadius:10}}
+        />
         </Card>
         <Button
           containerStyle={styles.restoreButtonContainer}
-          buttonStyle={[styles.text, {
-            padding: 16,
-            backgroundColor: this.colors[themeColorIndex],
-            borderRadius: 10,
-          }]}
+          buttonStyle={[styles.text, styles.buttonStyle]}
           onPress={this.restoreDefaults}
           title="Restore Defaults"
         />
@@ -143,7 +91,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     alignItems: 'center',
     height: '100%',
-    backgroundColor: '#D0D3D4'
+    backgroundColor: '#EAECEE'
   },
   row: {
     flexDirection: 'row',
@@ -153,13 +101,11 @@ const styles = StyleSheet.create({
     ...defaultStyles.text,
     fontSize: 16,
   },
-  slider: {
-    width: 250,
-    marginLeft: 16
+  buttonGroupText: {
+    ...defaultStyles.text,
   },
   card: {
     alignItems: 'center',
-    backgroundColor: '#EAECEE',
     borderColor: '#ABB2B9',
     borderWidth: 0.3,
     borderRadius: 10,
@@ -167,5 +113,28 @@ const styles = StyleSheet.create({
   },
   restoreButtonContainer: {
     margin: 32
+  },
+  buttonStyle: {
+    padding: 16,
+    backgroundColor: defaultStyles.themecolor.backgroundColor,
+    borderRadius: 10,
+  },
+  selectedButtonStyle: {
+    backgroundColor: defaultStyles.themecolor.backgroundColor,
   }
 });
+
+const mapStateToProps = state => {
+  return {
+    engine: state.engine,
+    showNotifications: state.showNotifications,
+    engines: state.engines,
+  };
+};
+
+const mapDispatchToProps = {
+  selectEngine,
+  setNotifications,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

@@ -9,3 +9,8 @@ export const GET_MOVIES_SUCCESS = 'GET_MOVIES_SUCCESS';
 export const OPEN_MOVIE_POPUP = 'OPEN_MOVIE';
 // close movie popup
 export const CLOSE_MOVIE_POPUP = 'CLOSE_MOVIE';
+// show notifications
+export const SHOW_NOTIFICATIONS = 'SHOW_NOTIFICATIONS';
+// select engine
+export const SELECT_ENGINE = 'SELECT_ENGINE';
+export const SELECT_ENGINE_SUCCESS = 'SELECT_ENGINE_SUCCESS';
