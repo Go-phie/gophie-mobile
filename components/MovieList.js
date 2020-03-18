@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import uuid from 'react-native-uuid';
 import AsyncStorage from '@react-native-community/async-storage';
+import {PermissionsAndroid} from 'react-native';
 import { listMovies, openMovie, closeMovie, setNotifications, selectEngine } from '../reducers';
 import MoviePoster from './MoviePoster';
 import MoviePopup from './MoviePopup';
@@ -15,11 +16,29 @@ const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
     contentSize.height - paddingToBottom;
 };
 
-
 class MovieList extends Component {
   componentDidMount() {
+    this.requestPermissions();
     this.loadAsyncData();
     this.props.listMovies("GET", this.props.engine, this.props.listIndex);
+  }
+
+  requestPermissions = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple(
+        [
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        ]
+      );
+      Object.values(granted).map(function(val, _){
+        if (val!== "granted"){
+          console.log('One permission denied');
+        }
+      })
+    } catch (err) {
+      console.warn(err);
+    }
   }
 
   loadAsyncData = async () => {

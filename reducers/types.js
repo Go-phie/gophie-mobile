@@ -14,3 +14,8 @@ export const SHOW_NOTIFICATIONS = 'SHOW_NOTIFICATIONS';
 // select engine
 export const SELECT_ENGINE = 'SELECT_ENGINE';
 export const SELECT_ENGINE_SUCCESS = 'SELECT_ENGINE_SUCCESS';
+// downloads
+export const ADD_DOWNLOAD = 'ADD_DOWNLOAD';
+export const END_DOWNLOAD = 'END_DOWNLOAD';
+export const REMOVE_DOWNLOAD = 'REMOVE_DOWNLOAD';
+export const PAUSE_DOWNLOAD = 'PAUSE_DOWNLOAD';

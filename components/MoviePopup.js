@@ -9,13 +9,33 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { closeMovie } from '../reducers';
+// import RNFetchBlob from 'rn-fetch-blob'
+import { closeMovie, downloadMovie } from '../reducers';
 import Modal from "react-native-modal";
 import { defaultStyles } from '../styles';
 
 const { width, height } = Dimensions.get('window');
-// const re = new RegExp(/\d+.?\d+/)
+
 class MoviePopup extends Component {
+
+    // downloadMovie = (movie) => {
+    // RNFetchBlob.config({
+    // // add this option that makes response data to be stored as a file,
+    // // this is much more performant.
+    // fileCache : true,
+    // overwrite: false,
+    // })
+    // .fetch('GET', movie.DownloadLink, {
+    //     //some headers ..
+    // })
+    // .progress((received, total) => {
+    //     console.log('progress', received / total)
+    // })
+    // .then((res) => {
+    //     // the temp file path
+    //     console.log('The file saved to ', res.path())
+    // })
+    // }
 
     render() {
         const { movie, navigation, engine, popupIsOpen, closeMovie } = this.props
@@ -45,7 +65,10 @@ class MoviePopup extends Component {
                 <View style={styles.footer}>
                 <TouchableHighlight underlayColor="#9575CD"
                 style={[styles.buttonContainer, defaultStyles.themecolor]}
-                //   onPress={onBook}
+                  onPress={() => {
+                      downloadMovie();
+                      closeMovie();
+                      return navigation.navigate('Downloads')}}
                 >
                 <Text style={styles.button}> Download </Text> 
                 </TouchableHighlight > 
@@ -147,6 +170,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {
     closeMovie,
+    downloadMovie,
 };
 
 function MPopup(props) {

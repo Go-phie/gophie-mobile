@@ -49,6 +49,7 @@ class Settings extends Component {
   render(){
     console.disableYellowBox = true;
     const notif = this.props.showNotifications
+
     return (
       <View style={styles.container}>
         <Card containerStyle={styles.card} title='Notifications' >
@@ -65,7 +66,7 @@ class Settings extends Component {
             />
           </View>
         </Card>
-        <Card containerStyle={styles.card} title='Engine'>
+        <Card containerStyle={[styles.card, {marginLeft: 10}]} title='Engine'>
         <ButtonGroup
           selectedIndex={this.engineToIndex(this.props.engine)}
           selectedTextStyle={{color: '#000000'}}
@@ -95,14 +96,11 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   text: {
     ...defaultStyles.text,
     fontSize: 16,
-  },
-  buttonGroupText: {
-    ...defaultStyles.text,
   },
   card: {
     alignItems: 'center',

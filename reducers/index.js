@@ -10,6 +10,7 @@ import {
         SHOW_NOTIFICATIONS,
         SELECT_ENGINE,
         SELECT_ENGINE_SUCCESS,
+        ADD_DOWNLOAD,
     } from './types'
 
 
@@ -21,6 +22,7 @@ const defaultState = {
   popupIsOpen: false,
   movieUri: "",
   showNotifications: false,
+  downloads: {},
 }
 
 // actions
@@ -94,17 +96,31 @@ export function selectEngine(value){
   }
 }
 
+export function downloadMovie(){
+  console.log("Clicked download");
+  return {
+    type: ADD_DOWNLOAD,
+  }
+}
 
 // reducer
 export default function reducer(state=defaultState, action) {
-  // FIXME: does not load new pages instead keeps reloading page1
   switch (action.type) {
     case SELECT_ENGINE:
-      console.log("In select engine to pick ", action.payload.engine)
       return {...state, engine: action.payload.engine, loading:true}
     case GET_MOVIES:
     case ADD_MOVIES:
       return { ...state, loading: true };
+    case ADD_DOWNLOAD:
+      console.log("In start download")
+      movie = state.movie
+      if (movie.DownloadLink in state.downloads){
+        return state 
+      } else {
+        console.log("Adding ", movie.Title, " to downloads")
+        state.downloads[movie.DownloadLink] = movie
+        return state
+      }
     case GET_MOVIES_SUCCESS:
     case SELECT_ENGINE_SUCCESS:
       return { ...state, loading: false, movies: action.payload.data };
