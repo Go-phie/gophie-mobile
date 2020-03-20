@@ -5,6 +5,12 @@ export const GET_MOVIES_FAIL = 'GET_MOVIES_FAIL';
 export const ADD_MOVIES_SUCCESS = 'ADD_MOVIES_SUCCESS';
 export const ADD_MOVIES_FAIL = 'ADD_MOVIES_FAIL';
 export const GET_MOVIES_SUCCESS = 'GET_MOVIES_SUCCESS';
+// downloads
+export const ADD_DOWNLOAD = 'ADD_DOWNLOAD';
+export const UPDATE_DOWNLOAD_STATUS = 'UPDATE_DOWNLOAD_STATUS';
+export const UPDATE_DOWNLOAD_FILL = 'UPDATE_DOWNLOAD_FILL';
+export const END_DOWNLOAD = 'END_DOWNLOAD';
+export const REMOVE_DOWNLOAD = 'REMOVE_DOWNLOAD';
 // open a movie popup
 export const OPEN_MOVIE_POPUP = 'OPEN_MOVIE';
 // close movie popup
@@ -14,8 +20,3 @@ export const SHOW_NOTIFICATIONS = 'SHOW_NOTIFICATIONS';
 // select engine
 export const SELECT_ENGINE = 'SELECT_ENGINE';
 export const SELECT_ENGINE_SUCCESS = 'SELECT_ENGINE_SUCCESS';
-// downloads
-export const ADD_DOWNLOAD = 'ADD_DOWNLOAD';
-export const END_DOWNLOAD = 'END_DOWNLOAD';
-export const REMOVE_DOWNLOAD = 'REMOVE_DOWNLOAD';
-export const PAUSE_DOWNLOAD = 'PAUSE_DOWNLOAD';

@@ -5,17 +5,23 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import Download from './Download';
-import { downloadMovie } from '../reducers';
+import { downloadMovie, closeMovie, updateDownloadFill, updateDownloadStatus } from '../reducers';
 
 
 class DownloadList extends Component {
   render(){
     console.disableYellowBox = true;
-    const {downloads} = this.props
+    const {downloads, updateDownloadFill, updateDownloadStatus} = this.props
 
     return (
       <View style={styles.container}>
-          {Object.keys(downloads).map((key, _) => <Download download={downloads[key]} key={downloads[key].key}/>)}
+          {Object.keys(downloads).map((key, _) =>
+           <Download 
+           download={downloads[key]} 
+           key={downloads[key].key} 
+           updateDownloadFill={updateDownloadFill}
+           updateDownloadStatus={updateDownloadStatus}/>
+           )}
       </View>
     );
   }
@@ -33,11 +39,15 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => {
   return {
     downloads: state.downloads,
+    movie: state.movie,
   };
 };
 
 const mapDispatchToProps = {
   downloadMovie,
+  closeMovie,
+  updateDownloadFill,
+  updateDownloadStatus,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DownloadList);

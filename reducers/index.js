@@ -1,6 +1,7 @@
 import { 
         GET_MOVIES,
         ADD_MOVIES,
+        ADD_DOWNLOAD,
         ADD_MOVIES_SUCCESS,
         GET_MOVIES_FAIL, 
         ADD_MOVIES_FAIL,
@@ -10,7 +11,8 @@ import {
         SHOW_NOTIFICATIONS,
         SELECT_ENGINE,
         SELECT_ENGINE_SUCCESS,
-        ADD_DOWNLOAD,
+        UPDATE_DOWNLOAD_FILL,
+        UPDATE_DOWNLOAD_STATUS,
     } from './types'
 
 
@@ -26,7 +28,6 @@ const defaultState = {
 }
 
 // actions
-
 export function openMovie(movie){
   return {
     type: OPEN_MOVIE_POPUP,
@@ -97,30 +98,68 @@ export function selectEngine(value){
 }
 
 export function downloadMovie(){
-  console.log("Clicked download");
   return {
-    type: ADD_DOWNLOAD,
+    type: ADD_DOWNLOAD
+  }
+}
+
+
+// update percentage of a particular download
+export function updateDownloadFill(movielink, fill){
+  return {
+    type: UPDATE_DOWNLOAD_FILL,
+    payload: {
+      movielink: movielink,
+      fill: fill,
+    }
+  }
+}
+
+// update download status between pause and play
+export function updateDownloadStatus(movielink, status){
+  if (status === 'pause' || status === 'play'){
+    console.log('updating status to ', status)
+    return {
+      type: UPDATE_DOWNLOAD_STATUS,
+      payload: {
+        movielink: movielink,
+        status: status
+      }
+    }
   }
 }
 
 // reducer
 export default function reducer(state=defaultState, action) {
+  console.log(action.type)
   switch (action.type) {
-    case SELECT_ENGINE:
-      return {...state, engine: action.payload.engine, loading:true}
     case GET_MOVIES:
     case ADD_MOVIES:
       return { ...state, loading: true };
     case ADD_DOWNLOAD:
-      console.log("In start download")
-      movie = state.movie
-      if (movie.DownloadLink in state.downloads){
-        return state 
-      } else {
-        console.log("Adding ", movie.Title, " to downloads")
-        state.downloads[movie.DownloadLink] = movie
-        return state
+      const download = {...state.movie, status: 'play'}
+      const newdownloads = {...state.downloads}
+      if (!(download.DownloadLink in state.downloads)){
+        console.log("Adding ", download.Title, " to downloads")
+        newdownloads[download.DownloadLink] = download
       }
+      return {...state, downloads: newdownloads}
+    case UPDATE_DOWNLOAD_STATUS:
+        const statusdownloads = {...state.downloads}
+        statusdownloads[action.payload.movielink] = {
+          ...statusdownloads[action.payload.movielink],
+          status: action.payload.status,
+        }
+        return {...state, downloads: statusdownloads}
+    case UPDATE_DOWNLOAD_FILL:
+      const updateddownloads = {...state.downloads}
+      updateddownloads[action.payload.movielink] = {
+        ...updateddownloads[action.payload.movielink],
+        fill: action.payload.fill,
+      }
+      return {...state, downloads: updateddownloads}
+    case SELECT_ENGINE:
+      return {...state, engine: action.payload.engine, loading:true}
     case GET_MOVIES_SUCCESS:
     case SELECT_ENGINE_SUCCESS:
       return { ...state, loading: false, movies: action.payload.data };
