@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight, Alert } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { Card } from 'react-native-elements';
 import RNFetchBlob from 'rn-fetch-blob'
@@ -8,36 +8,51 @@ import { defaultStyles } from '../styles'
 
 export default class Download extends Component {
 
+    executeCancel = (movie) => {
+      const {cancelDownload} = this.props
+
+      // TODO: stop the downloader
+
+      Alert.alert(
+        'Cancel Download',
+        'Are you sure you want to cancel downloading ' + movie.Title,
+        [
+          {text: 'No',style: 'cancel'},
+          {text: 'Yes', onPress: () => cancelDownload(movie.DownloadLink)},
+        ],
+        {cancelable: false},
+      );
+    }
 
     componentDidMount() {
       const  { download, updateDownloadFill } = this.props
       // download the movie
-      let config = RNFetchBlob.config({
-        fileCache: true,
-        overwrite: false,
-      })
+      // let config = RNFetchBlob.config({
+      //   fileCache: true,
+      //   overwrite: false,
+      // })
       
-      let task = config.fetch('GET', download.DownloadLink, {
-        //headers
-      }).progress((received, total) => {
-        if (download.status==='play'){
-          console.log(download.Title, " downloading at ", (received/total)*100)
-          updateDownloadFill(download.DownloadLink, (received/total)*100)
-        }
-      }).then((res) => {
-        // temp file path
-        console.log('Saved to ', res.path())
-      }).catch((err) => {
-        console.log("Pausing movie ", download.Title, err)
-      })
-      // if download status is paused, cancel task
-      if (download.status === 'pause'){
-        task.cancel()
-      }
+      // let task = config.fetch('GET', download.DownloadLink, {
+      //   //headers
+      // }).progress((received, total) => {
+      //   if (download.status==='play'){
+      //     console.log(download.Title, " downloading at ", (received/total)*100)
+      //     updateDownloadFill(download.DownloadLink, (received/total)*100)
+      //   }
+      // }).then((res) => {
+      //   // temp file path
+      //   console.log('Saved to ', res.path())
+      // }).catch((err) => {
+      //   console.log("Pausing movie ", download.Title, err)
+      // })
+      // // if download status is paused, cancel task
+      // if (download.status === 'pause'){
+      //   task.cancel()
+      // }
     }
 
     render(){
-        const { download, updateDownloadStatus } = this.props;
+        const { download, updateDownloadStatus, cancelDownload } = this.props;
         console.log(download.fill)
         return(
             <Card containerStyle={styles.card} title={download.Title} titleNumberOfLines={1} >
@@ -80,7 +95,7 @@ export default class Download extends Component {
                   name="close"
                   backgroundColor="#ffffff"
                   color="#000000"
-                  // onPress={this.loginWithFacebook}
+                  onPress={() => this.executeCancel(download)}
                 />
             </View>
           </Card>

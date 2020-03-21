@@ -18,14 +18,15 @@ const { width, height } = Dimensions.get('window');
 class MoviePopup extends Component {
 
     render() {
-        const { movie, navigation, engine, popupIsOpen, closeMovie, downloadMovie } = this.props
+        console.log(this.props)
+        const { movie, navigation, popupIsOpen, closeMovie, downloadMovie } = this.props
 
         if (movie !== undefined) {
             // extract movie size
             //regular expression to match size
             // let size = parseFloat(re.exec(String(movie.Size))[0])
             let description = movie.Description === "" ?
-                "Could not retrieve descriptions from " + engine :
+                "Could not retrieve descriptions from " + movie.Source.toLowerCase() :
                 movie.Description
             return ( 
             < Modal isVisible ={popupIsOpen} onBackdropPress = {() => closeMovie()} >

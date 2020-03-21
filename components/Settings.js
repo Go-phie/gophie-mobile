@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
-  Switch
+  Switch,
+  ToastAndroid,
 } from 'react-native';
 import { connect } from 'react-redux';
 import { Card, Text, ButtonGroup, Button } from 'react-native-elements';
-import {ToastAndroid} from 'react-native';
 import {setNotifications, selectEngine} from '../reducers'
 import AsyncStorage from '@react-native-community/async-storage';
 import { defaultStyles } from '../styles'

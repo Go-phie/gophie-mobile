@@ -2,27 +2,34 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
+  ScrollView,
 } from 'react-native';
 import { connect } from 'react-redux';
 import Download from './Download';
-import { downloadMovie, closeMovie, updateDownloadFill, updateDownloadStatus } from '../reducers';
+import { 
+  downloadMovie, 
+  closeMovie, 
+  updateDownloadFill, 
+  updateDownloadStatus,
+  cancelDownload } from '../reducers';
 
 
 class DownloadList extends Component {
   render(){
     console.disableYellowBox = true;
-    const {downloads, updateDownloadFill, updateDownloadStatus} = this.props
+    const {downloads, updateDownloadFill, updateDownloadStatus, cancelDownload} = this.props
 
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
           {Object.keys(downloads).map((key, _) =>
            <Download 
            download={downloads[key]} 
            key={downloads[key].key} 
            updateDownloadFill={updateDownloadFill}
-           updateDownloadStatus={updateDownloadStatus}/>
+           updateDownloadStatus={updateDownloadStatus}
+           cancelDownload={cancelDownload}/>
            )}
-      </View>
+      </ScrollView>
     );
   }
 };
@@ -31,7 +38,6 @@ const styles = StyleSheet.create({
   container: {
     borderColor: 'black',
     alignItems: 'center',
-    height: '100%',
     backgroundColor: '#EAECEE'
   },
 });
@@ -48,6 +54,7 @@ const mapDispatchToProps = {
   closeMovie,
   updateDownloadFill,
   updateDownloadStatus,
+  cancelDownload,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DownloadList);

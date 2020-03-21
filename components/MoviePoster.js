@@ -10,7 +10,7 @@ export default class MoviePoster extends Component {
     render(){
         const { movie, onOpen } = this.props;
         return(
-            <TouchableOpacity style={styles.container} onPress={() => onOpen(movie)}>
+            <TouchableOpacity style={styles.container} onPress={() => {onOpen(movie)}}>
             <View style={styles.imageContainer}>
             <Image 
             style={styles.image}

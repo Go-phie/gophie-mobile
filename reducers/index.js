@@ -1,6 +1,9 @@
 import { 
         GET_MOVIES,
         ADD_MOVIES,
+        SEARCH_MOVIE,
+        SEARCH_MOVIE_SUCCESS,
+        SEARCH_MOVIE_FAILURE,
         ADD_DOWNLOAD,
         ADD_MOVIES_SUCCESS,
         GET_MOVIES_FAIL, 
@@ -13,6 +16,7 @@ import {
         SELECT_ENGINE_SUCCESS,
         UPDATE_DOWNLOAD_FILL,
         UPDATE_DOWNLOAD_STATUS,
+        CANCEL_DOWNLOAD,
     } from './types'
 
 
@@ -25,6 +29,7 @@ const defaultState = {
   movieUri: "",
   showNotifications: false,
   downloads: {},
+  query: "",
 }
 
 // actions
@@ -32,7 +37,7 @@ export function openMovie(movie){
   return {
     type: OPEN_MOVIE_POPUP,
     payload: {
-      movie: movie
+      movie
     }
   }
 }
@@ -50,7 +55,7 @@ export function listMovies(mode, engine, page) {
       payload: {
         request: {
           url: `/list?page=${page}&engine=${engine}`
-        }
+        },
       }
     };
   } else if (mode=== "GET") {
@@ -59,21 +64,10 @@ export function listMovies(mode, engine, page) {
       payload: {
         request: {
           url: `/list?page=${page}&engine=${engine}`
-        }
+        },
       }
     };
   }
-}
-
-export function searchMovies(engine, query) {
-    return {
-        type: GET_MOVIES,
-        payload: {
-            request: {
-                url: `/search?query=${query}&engine=${engine}`
-            }
-        }
-    }
 }
 
 export function setNotifications(value){
@@ -91,7 +85,7 @@ export function selectEngine(value){
     payload: {
       engine: value,
       request: {
-        url: `/list?page=1&engine=${value}`
+        url: `/list?page=${1}&engine=${value}`
       }
     }
   }
@@ -103,14 +97,22 @@ export function downloadMovie(){
   }
 }
 
+export function cancelDownload(movielink){
+  return {
+    type: CANCEL_DOWNLOAD,
+    payload: {
+      movielink
+    }
+  }
+}
 
 // update percentage of a particular download
 export function updateDownloadFill(movielink, fill){
   return {
     type: UPDATE_DOWNLOAD_FILL,
     payload: {
-      movielink: movielink,
-      fill: fill,
+      movielink,
+      fill,
     }
   }
 }
@@ -122,11 +124,41 @@ export function updateDownloadStatus(movielink, status){
     return {
       type: UPDATE_DOWNLOAD_STATUS,
       payload: {
-        movielink: movielink,
-        status: status
+        movielink,
+        status
       }
     }
   }
+}
+
+export function updateSearch(query, engine){
+  if (query !== ""){
+    return {
+      type: SEARCH_MOVIE,
+      payload: {
+        request: {
+            url: `/search?query=${encodeURI(query)}&engine=${engine}`
+        },
+        query
+    }
+    }
+  }
+  return {
+    type: GET_MOVIES,
+    payload: {
+      request: {
+        url: `/list?page=1&engine=${engine}`
+      }
+    }
+  }
+}
+
+function validMovie(movie) {
+  if (movie.CoverPhotoLink !== "" && !movie.DownloadLink.endsWith('/download'))
+  {
+    return true
+  }
+  return false
 }
 
 // reducer
@@ -135,7 +167,7 @@ export default function reducer(state=defaultState, action) {
   switch (action.type) {
     case GET_MOVIES:
     case ADD_MOVIES:
-      return { ...state, loading: true };
+      return { ...state, loading: true, query: "" };
     case ADD_DOWNLOAD:
       const download = {...state.movie, status: 'play'}
       const newdownloads = {...state.downloads}
@@ -158,11 +190,25 @@ export default function reducer(state=defaultState, action) {
         fill: action.payload.fill,
       }
       return {...state, downloads: updateddownloads}
+    case CANCEL_DOWNLOAD:
+      const nonCancelledDownloads = {...state.downloads}
+      delete nonCancelledDownloads[action.payload.movielink]
+      return {...state, downloads: nonCancelledDownloads}
+    case SEARCH_MOVIE:
+      return {...state, loading: true, query: action.payload.query}
+    case SEARCH_MOVIE_SUCCESS:
+      if (action.payload.data !== null) {
+        console.log(action.payload.data)
+        return {...state, loading: false, movies: action.payload.data.filter(validMovie)}
+      }
+      return {...state, loading: false}
+    case SEARCH_MOVIE_FAILURE:
+      return {...state, loading: false}
     case SELECT_ENGINE:
       return {...state, engine: action.payload.engine, loading:true}
     case GET_MOVIES_SUCCESS:
     case SELECT_ENGINE_SUCCESS:
-      return { ...state, loading: false, movies: action.payload.data };
+      return { ...state, loading: false, movies: action.payload.data.filter(validMovie) };
     case ADD_MOVIES_SUCCESS:
       return {...state, listIndex: state.listIndex+1, movies: [...state.movies, ...action.payload.data]};
     case GET_MOVIES_FAIL:
@@ -173,8 +219,7 @@ export default function reducer(state=defaultState, action) {
         error: 'Error while getting movies'
       };
     case OPEN_MOVIE_POPUP:
-      movie = action.payload.movie
-      return {...state, popupIsOpen: true, movie, movieUri: movie.DownloadLink}
+      return {...state, popupIsOpen: true, movie: action.payload.movie, movieUri: action.payload.movie.DownloadLink}
     case CLOSE_MOVIE_POPUP:
       return {...state, popupIsOpen:false}
     case SHOW_NOTIFICATIONS:

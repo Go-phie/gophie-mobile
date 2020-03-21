@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, PermissionsAndroid } from 'react-native';
 import { connect } from 'react-redux';
 import uuid from 'react-native-uuid';
 import AsyncStorage from '@react-native-community/async-storage';
-import {PermissionsAndroid} from 'react-native';
-import { listMovies, openMovie, closeMovie, setNotifications, selectEngine } from '../reducers';
+import { SearchBar } from 'react-native-elements';
+import { 
+  listMovies,
+  openMovie, 
+  closeMovie, 
+  setNotifications, 
+  selectEngine,
+  updateSearch,
+ } from '../reducers';
 import MoviePoster from './MoviePoster';
 import MoviePopup from './MoviePopup';
 import {ENGINE_KEY, SHOW_NOTIFICATIONS_KEY} from '../consts'
@@ -55,6 +62,7 @@ class MovieList extends Component {
       const egnIndex = await AsyncStorage.getItem(ENGINE_KEY)
       if (egnIndex !== null) {
         this.props.selectEngine(this.props.engines[JSON.parse(egnIndex)])
+        console.log(this.props.engines[JSON.parse(egnIndex)])
       }
     } catch (e) {
       console.log(e)
@@ -62,16 +70,25 @@ class MovieList extends Component {
   }
   
   render() {
-    const { movies, openMovie } = this.props;
+    const { movies, openMovie, query, updateSearch, engine, listMovies, listIndex } = this.props;
     return (
       <View style={styles.container}>
+        <SearchBar
+        placeholder="Search movie ..."
+        onChangeText={(query) => updateSearch(query, engine)}
+        value={query}
+        containerStyle={[styles.searchBar, {height: 50}]}
+        onCancel={() =>listMovies("GET", engine, 1)}
+        inputContainerStyle={styles.searchBar}
+        // showLoading={true}
+      />
       <ScrollView
       contentContainerStyle={styles.scrollContent}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       onScroll={({nativeEvent}) => {
-        if (isCloseToBottom(nativeEvent)) {
-          this.props.listMovies("ADD", this.props.engine, this.props.listIndex+1)
+        if (isCloseToBottom(nativeEvent) && query==="") {
+          listMovies("ADD", engine, listIndex+1)
         }
       }}
       scrollEventThrottle={400}>
@@ -91,6 +108,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',   // arrange posters in rows
     flexWrap: 'wrap',       // allow multiple rows
   },
+  searchBar: {
+    backgroundColor: 'transparent',
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+  }
 });
 
 const mapStateToProps = state => {
@@ -104,6 +126,7 @@ const mapStateToProps = state => {
     popupIsOpen: state.popupIsOpen,
     movie: state.movie,
     showNotifications: state.showNotifications,
+    query: state.query,
   };
 };
 
@@ -113,6 +136,7 @@ const mapDispatchToProps = {
   closeMovie,
   setNotifications,
   selectEngine,
+  updateSearch,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(MovieList);
