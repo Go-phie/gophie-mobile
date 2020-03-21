@@ -1,3 +1,4 @@
+import {ToastAndroid} from 'react-native';
 import { 
         GET_MOVIES,
         ADD_MOVIES,
@@ -14,6 +15,7 @@ import {
         SHOW_NOTIFICATIONS,
         SELECT_ENGINE,
         SELECT_ENGINE_SUCCESS,
+        SELECT_ENGINE_FAILURE,
         UPDATE_DOWNLOAD_FILL,
         UPDATE_DOWNLOAD_STATUS,
         CANCEL_DOWNLOAD,
@@ -30,6 +32,7 @@ const defaultState = {
   showNotifications: false,
   downloads: {},
   query: "",
+  searchloader: false,
 }
 
 // actions
@@ -148,7 +151,7 @@ export function updateSearch(query, engine){
     payload: {
       request: {
         url: `/list?page=1&engine=${engine}`
-      }
+      },
     }
   }
 }
@@ -167,7 +170,7 @@ export default function reducer(state=defaultState, action) {
   switch (action.type) {
     case GET_MOVIES:
     case ADD_MOVIES:
-      return { ...state, loading: true, query: "" };
+      return { ...state, loading: true, query: "", searchloader: false };
     case ADD_DOWNLOAD:
       const download = {...state.movie, status: 'play'}
       const newdownloads = {...state.downloads}
@@ -195,22 +198,28 @@ export default function reducer(state=defaultState, action) {
       delete nonCancelledDownloads[action.payload.movielink]
       return {...state, downloads: nonCancelledDownloads}
     case SEARCH_MOVIE:
-      return {...state, loading: true, query: action.payload.query}
+      return {...state, loading: true, query: action.payload.query, searchloader: true}
     case SEARCH_MOVIE_SUCCESS:
       if (action.payload.data !== null) {
         console.log(action.payload.data)
-        return {...state, loading: false, movies: action.payload.data.filter(validMovie)}
+        return {...state, loading: false, movies: action.payload.data.filter(validMovie), searchloader: false}
       }
-      return {...state, loading: false}
+      ToastAndroid.show("Could not retrive any movie using query", ToastAndroid.SHORT)
+      return {...state, loading: false, searchloader: false}
     case SEARCH_MOVIE_FAILURE:
       return {...state, loading: false}
     case SELECT_ENGINE:
       return {...state, engine: action.payload.engine, loading:true}
-    case GET_MOVIES_SUCCESS:
     case SELECT_ENGINE_SUCCESS:
+      ToastAndroid.show('Engine set to ' + state.engine, ToastAndroid.SHORT);
+      return { ...state, loading: false, movies: action.payload.data.filter(validMovie) };
+    case SELECT_ENGINE_FAILURE:
+      ToastAndroid.show('Error setting engine', ToastAndroid.LONG);
+      return {...state, loading: false}
+    case GET_MOVIES_SUCCESS:
       return { ...state, loading: false, movies: action.payload.data.filter(validMovie) };
     case ADD_MOVIES_SUCCESS:
-      return {...state, listIndex: state.listIndex+1, movies: [...state.movies, ...action.payload.data]};
+      return {...state, listIndex: state.listIndex+1, movies: [...state.movies, ...action.payload.data.filter(validMovie)]};
     case GET_MOVIES_FAIL:
     case ADD_MOVIES_FAIL:
       return {

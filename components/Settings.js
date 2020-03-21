@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Switch,
-  ToastAndroid,
 } from 'react-native';
 import { connect } from 'react-redux';
 import { Card, Text, ButtonGroup, Button } from 'react-native-elements';
@@ -27,7 +26,6 @@ class Settings extends Component {
     try {
       await AsyncStorage.setItem(ENGINE_KEY, JSON.stringify(egnIndex))
       this.props.selectEngine(this.props.engines[egnIndex])
-      ToastAndroid.show('Engine set to ' + this.props.engines[egnIndex], ToastAndroid.SHORT);
     } catch (e) {
       console.log(e);
     }

@@ -70,7 +70,7 @@ class MovieList extends Component {
   }
   
   render() {
-    const { movies, openMovie, query, updateSearch, engine, listMovies, listIndex } = this.props;
+    const { movies, searchloader, openMovie, query, updateSearch, engine, listMovies, listIndex } = this.props;
     return (
       <View style={styles.container}>
         <SearchBar
@@ -80,7 +80,7 @@ class MovieList extends Component {
         containerStyle={[styles.searchBar, {height: 50}]}
         onCancel={() =>listMovies("GET", engine, 1)}
         inputContainerStyle={styles.searchBar}
-        // showLoading={true}
+        showLoading={searchloader}
       />
       <ScrollView
       contentContainerStyle={styles.scrollContent}
@@ -127,6 +127,7 @@ const mapStateToProps = state => {
     movie: state.movie,
     showNotifications: state.showNotifications,
     query: state.query,
+    searchloader: state.searchloader,
   };
 };
 
