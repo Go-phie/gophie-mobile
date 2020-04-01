@@ -81,7 +81,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
-
+apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
@@ -179,6 +179,7 @@ android {
 }
 
 dependencies {
+    addUnimodulesDependencies()
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
 

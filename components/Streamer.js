@@ -1,4 +1,3 @@
-// Load the module
 import React, { Component } from 'react';
 import {
   StyleSheet,
@@ -33,7 +32,8 @@ class Streamer extends Component {
             onError={this.videoError}               // Callback when video cannot be loaded
             style={styles.backgroundVideo}
             poster={"https://github.com/bisoncorps/gophie/raw/master/assets/reel.png"}
-            controls={true} />: null
+            controls={true} 
+            fullscreen={true}/>: null
         )
     }
 }

@@ -15,6 +15,7 @@ import {
 import MoviePoster from './MoviePoster';
 import MoviePopup from './MoviePopup';
 import {ENGINE_KEY, SHOW_NOTIFICATIONS_KEY} from '../consts'
+import { FileSystem } from 'react-native-unimodules';
 
 
 const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
@@ -28,6 +29,17 @@ class MovieList extends Component {
     this.requestPermissions();
     this.loadAsyncData();
     this.props.listMovies("GET", this.props.engine, this.props.listIndex);
+  }
+
+  createDocumentDir = async() => {
+    try{
+      const {exists} = await FileSystem.getInfoAsync(FileSystem.documentDirectory)
+      if (!exists){
+        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory, {intermediates: true})
+      }
+    }catch(e){
+      console.error(e)
+    }
   }
 
   requestPermissions = async () => {

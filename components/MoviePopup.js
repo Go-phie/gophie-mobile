@@ -18,7 +18,6 @@ const { width, height } = Dimensions.get('window');
 class MoviePopup extends Component {
 
     render() {
-        console.log(this.props)
         const { movie, navigation, popupIsOpen, closeMovie, downloadMovie } = this.props
 
         if (movie !== undefined) {

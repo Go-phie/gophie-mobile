@@ -18,6 +18,7 @@ import {
         SELECT_ENGINE_FAILURE,
         UPDATE_DOWNLOAD_FILL,
         UPDATE_DOWNLOAD_STATUS,
+        UPDATE_DOWNLOAD_TASK,
         CANCEL_DOWNLOAD,
     } from './types'
 
@@ -25,7 +26,7 @@ import {
 const defaultState = {
   movies: [],
   engine: 'netnaija',
-  engines: ['netnaija', 'fzmovies'],
+  engines: ['netnaija', 'fzmovies', "besthdmovies"],
   listIndex: 1,
   popupIsOpen: false,
   movieUri: "",
@@ -134,6 +135,16 @@ export function updateDownloadStatus(movielink, status){
   }
 }
 
+export function updateDownloadTask(movielink, task){
+  return {
+    type: UPDATE_DOWNLOAD_TASK,
+    payload: {
+      task,
+      movielink
+    }
+  }
+}
+
 export function updateSearch(query, engine){
   if (query !== ""){
     return {
@@ -197,6 +208,13 @@ export default function reducer(state=defaultState, action) {
       const nonCancelledDownloads = {...state.downloads}
       delete nonCancelledDownloads[action.payload.movielink]
       return {...state, downloads: nonCancelledDownloads}
+    case UPDATE_DOWNLOAD_TASK:
+      const updatedDownloadTasks = {...state.downloads}
+      updatedDownloadTasks[action.payload.movielink] = {
+        ...updatedDownloadTasks[action.payload.movielink],
+        task: action.payload.task
+      }
+      return {...state, downloads: updatedDownloadTasks}
     case SEARCH_MOVIE:
       return {...state, loading: true, query: action.payload.query, searchloader: true}
     case SEARCH_MOVIE_SUCCESS:

@@ -2,15 +2,13 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight, Alert } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { Card } from 'react-native-elements';
-import RNFetchBlob from 'rn-fetch-blob'
+import {FileSystem} from 'react-native-unimodules';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { defaultStyles } from '../styles'
 
 export default class Download extends Component {
 
-    executeCancel = (movie) => {
-      const {cancelDownload} = this.props
-
+    executeCancel = async (movie, cancelDownload) => {
       // TODO: stop the downloader
 
       Alert.alert(
@@ -18,42 +16,89 @@ export default class Download extends Component {
         'Are you sure you want to cancel downloading ' + movie.Title,
         [
           {text: 'No',style: 'cancel'},
-          {text: 'Yes', onPress: () => cancelDownload(movie.DownloadLink)},
+          {text: 'Yes', onPress: async () => {
+            if (movie.task && movie.task.resumeData){
+              await movie.task.pauseAsync();
+            }
+            cancelDownload(movie.DownloadLink)
+          }
+          },
         ],
         {cancelable: false},
       );
     }
 
-    componentDidMount() {
-      const  { download, updateDownloadFill } = this.props
-      // download the movie
-      // let config = RNFetchBlob.config({
-      //   fileCache: true,
-      //   overwrite: false,
-      // })
-      
-      // let task = config.fetch('GET', download.DownloadLink, {
-      //   //headers
-      // }).progress((received, total) => {
-      //   if (download.status==='play'){
-      //     console.log(download.Title, " downloading at ", (received/total)*100)
-      //     updateDownloadFill(download.DownloadLink, (received/total)*100)
-      //   }
-      // }).then((res) => {
-      //   // temp file path
-      //   console.log('Saved to ', res.path())
-      // }).catch((err) => {
-      //   console.log("Pausing movie ", download.Title, err)
-      // })
-      // // if download status is paused, cancel task
-      // if (download.status === 'pause'){
-      //   task.cancel()
-      // }
+    executePlay = async (movie, updateDownloadStatus) => {
+      updateDownloadStatus(movie.DownloadLink, 'play')
+      if (movie.task && movie.task.resumeData){
+        try {
+          const { uri } = await movie.task.resumeAsync();
+          console.log('Finished downloading to ', uri);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
 
+    executePause = async (movie, updateDownloadStatus) => {
+      updateDownloadStatus(movie.movieLink, 'pause')
+      if (movie.task && movie.task.resumeData){
+        try {
+          const { uri } = await movie.task.pauseAsync();
+          console.log('Finished downloading to ', uri);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    // executeDownload = async (movie) => {
+    //   if(movie.task && !movie.fill){
+    //     try {
+    //       const { uri } = await movie.task.downloadAsync();
+    //       console.log('Finished downloading to ', uri);
+    //     } catch (e) {
+    //       console.error(e);
+    //     }
+    //   }
+    // }
+
+    async UNSAFE_componentWillReceiveProps(nextProps) {
+      const {download} = nextProps
+      if(download.task && !download.resumeData){
+        try {
+          const {uri} = await download.task.downloadAsync();
+          console.log('Finished downloading to', uri)
+        } catch(e){
+          console.error(e)
+        }
+      }
+    }
+
+
+    async componentDidMount(){
+      const {download, updateDownloadFill, updateDownloadTask} = this.props
+
+      const progressCallback = downloadProgress => {
+        const progress = (downloadProgress.totalBytesWritten/downloadProgress.totalBytesExpectedToWrite) * 100
+        console.log(progress)
+        updateDownloadFill(download.DownloadLink, progress)
+      }
+      if (!download.task){
+        const downloadResumable = FileSystem.createDownloadResumable(
+          download.DownloadLink,
+          FileSystem.documentDirectory + download.Title.replace(/ /g,'') + ".mp4",
+          {},
+          progressCallback
+        );
+        updateDownloadTask(download.DownloadLink, downloadResumable)
+      }
+    }
+    
+
     render(){
-        const { download, updateDownloadStatus, cancelDownload } = this.props;
-        console.log(download.fill)
+        const { download, cancelDownload, updateDownloadStatus } = this.props;
+        // this.executeDownload(download)
         return(
             <Card containerStyle={styles.card} title={download.Title} titleNumberOfLines={1} >
             <View style={styles.row}>
@@ -63,11 +108,10 @@ export default class Download extends Component {
               </TouchableHighlight>
               <Text>{'    '}</Text>
                 <AnimatedCircularProgress
-                  size={50}
+                  size={60}
                   width={10}
                   fill={download.fill? download.fill: 0}
                   tintColor={defaultStyles.themecolor.backgroundColor}
-                  // onAnimationComplete={() => console.log('onAnimationComplete')}
                   backgroundColor="#3d5875" >
                   {
                     (fill) => (
@@ -82,20 +126,20 @@ export default class Download extends Component {
                     backgroundColor="#ffffff"
                     color="#000000"
                     iconStyle={styles.iconStyle}
-                    onPress={() =>updateDownloadStatus(download.DownloadLink, 'pause')}
+                    onPress={() =>this.executePause(download, updateDownloadStatus)}
                   />: <Icon.Button
                   name="play"
                   backgroundColor="#ffffff"
                   color="#000000"
                   iconStyle={styles.iconStyle}
-                  onPress={() => updateDownloadStatus(download.DownloadLink, 'play')}
+                  onPress={() => this.executePlay(download, updateDownloadStatus)}
                 />
                   }
                   <Icon.Button
                   name="close"
                   backgroundColor="#ffffff"
                   color="#000000"
-                  onPress={() => this.executeCancel(download)}
+                  onPress={() => this.executeCancel(download, cancelDownload)}
                 />
             </View>
           </Card>
@@ -122,7 +166,7 @@ const styles = StyleSheet.create({
       },
       points: {
         textAlign: 'center',
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: '100',
       },
       source: {
@@ -132,7 +176,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 5,
       },
       iconStyle: {
-        marginLeft: 20, 
+        marginLeft: 5, 
         marginRight: 5,
       },
   });

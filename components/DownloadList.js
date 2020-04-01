@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {
   StyleSheet,
-  View,
   ScrollView,
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -11,23 +10,26 @@ import {
   closeMovie, 
   updateDownloadFill, 
   updateDownloadStatus,
+  updateDownloadTask,
   cancelDownload } from '../reducers';
 
 
 class DownloadList extends Component {
   render(){
     console.disableYellowBox = true;
-    const {downloads, updateDownloadFill, updateDownloadStatus, cancelDownload} = this.props
+    const {downloads, updateDownloadFill, updateDownloadStatus, updateDownloadTask, cancelDownload} = this.props
 
+    // Object.keys(downloads).map((key, _) => console.log(downloads[key]))
     return (
       <ScrollView contentContainerStyle={styles.container}>
           {Object.keys(downloads).map((key, _) =>
            <Download 
-           download={downloads[key]} 
            key={downloads[key].key} 
+           download={downloads[key]} 
            updateDownloadFill={updateDownloadFill}
            updateDownloadStatus={updateDownloadStatus}
-           cancelDownload={cancelDownload}/>
+           cancelDownload={cancelDownload}
+           updateDownloadTask={updateDownloadTask}/>
            )}
       </ScrollView>
     );
@@ -54,6 +56,7 @@ const mapDispatchToProps = {
   closeMovie,
   updateDownloadFill,
   updateDownloadStatus,
+  updateDownloadTask,
   cancelDownload,
 };
 
