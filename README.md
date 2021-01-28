@@ -11,3 +11,16 @@ Readme to be improved on
 ![Movie Popup](assets/gophie-mobile-movie-desc.png)
 
 ![Settings Page](assets/gophie-mobile-settings.png)
+
+## Development
+
+To run 
+
+```bash
+
+# Start metro server
+export API_KEY=XXXXXXXXXX && npx react-native start
+
+# Start android build
+npx react-native run-android
+```

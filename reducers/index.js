@@ -20,13 +20,13 @@ import {
         UPDATE_DOWNLOAD_STATUS,
         UPDATE_DOWNLOAD_TASK,
         CANCEL_DOWNLOAD,
-    } from './types'
+    } from './types';
 
 
 const defaultState = {
   movies: [],
-  engine: 'netnaija',
-  engines: ['netnaija', 'fzmovies', "besthdmovies"],
+  engine: 'fzmovies',
+  engines: ['netnaija', 'fzmovies', 'besthdmovies'],
   listIndex: 1,
   popupIsOpen: false,
   movieUri: "",
@@ -35,6 +35,7 @@ const defaultState = {
   query: "",
   searchloader: false,
 }
+
 
 // actions
 export function openMovie(movie){
@@ -151,7 +152,7 @@ export function updateSearch(query, engine){
       type: SEARCH_MOVIE,
       payload: {
         request: {
-            url: `/search?query=${encodeURI(query)}&engine=${engine}`
+            url: `/search?query=${encodeURI(query)}&engine=${engine}`,
         },
         query
     }
@@ -161,7 +162,7 @@ export function updateSearch(query, engine){
     type: GET_MOVIES,
     payload: {
       request: {
-        url: `/list?page=1&engine=${engine}`
+        url: `/list?page=1&engine=${engine}`,
       },
     }
   }

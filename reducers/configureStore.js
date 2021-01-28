@@ -4,9 +4,16 @@ import axios from 'axios';
 import axiosMiddleware from 'redux-axios-middleware';
 import reducer from './index'
 
+let authorization = `Bearer ${process.env.API_KEY}`;
 const client = axios.create({
-    baseURL: 'https://gophie.herokuapp.com',
-    responseType: 'json'
+    baseURL: 'https://deploy-gophie.herokuapp.com',
+//    baseURL: 'http://192.168.43.166:9000',
+    responseType: 'json',
+    headers: {
+      common: {
+        Authorization: authorization ,
+      }
+    },
   });
 
 
